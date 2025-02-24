@@ -1,14 +1,13 @@
 import { auth, signOut, signIn } from "@/auth";
-import { redirect } from "next/dist/server/api-utils";
 import Link from "next/link";
 
 const Navbar = async () => {
     const session = await auth();
 
     return <header>
-        <nav>
-            <Link href="/">
-                <img src="" alt="" />
+        <nav className="flex justify-between items-center p-4 bg-black shadow-md">
+            <Link href="/" >
+                <img src="./wamil-logo.png" alt="" className="max-w-24" />
             </Link>
 
             <div>

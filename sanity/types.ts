@@ -150,6 +150,7 @@ export type Comment = {
     _weak?: boolean;
     [internalGroqTypeReferenceTo]?: "comment";
   };
+  likes?: number;
 };
 
 export type Post = {
@@ -160,7 +161,7 @@ export type Post = {
   _rev: string;
   title?: string;
   slug?: Slug;
-  writer?: {
+  author?: {
     _ref: string;
     _type: "reference";
     _weak?: boolean;
@@ -168,8 +169,22 @@ export type Post = {
   };
   views?: number;
   likes?: number;
-  category?: string;
+  category?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "category";
+  };
   post?: string;
+};
+
+export type Category = {
+  _id: string;
+  _type: "category";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  category?: string;
 };
 
 export type Slug = {
@@ -194,5 +209,5 @@ export type User = {
 
 export type Markdown = string;
 
-export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageHotspot | SanityImageCrop | SanityFileAsset | SanityImageAsset | SanityImageMetadata | Geopoint | SanityAssetSourceData | Comment | Post | Slug | User | Markdown;
+export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityImageHotspot | SanityImageCrop | SanityFileAsset | SanityImageAsset | SanityImageMetadata | Geopoint | SanityAssetSourceData | Comment | Post | Category | Slug | User | Markdown;
 export declare const internalGroqTypeReferenceTo: unique symbol;

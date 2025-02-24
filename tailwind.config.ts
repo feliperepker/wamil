@@ -10,20 +10,22 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: '100vw', 
+          }
+        }
+      },
       screens: {
-        xs: "475px",
+        xs: "475px"
       },
       colors: {
-        primary: {
-          "100": "#FFE8F0",
-          DEFAULT: "#EE2B69",
-        },
-        secondary: "#FBE843",
+        primary:  "#F09029",
+        secondary: "#29BBF0",
         black: {
-          "100": "#333333",
-          "200": "#141413",
-          "300": "#7D8087",
-          DEFAULT: "#000000",
+          "100": "#272c2e",
+          DEFAULT: "#1f2425",
         },
         white: {
           "100": "#F7F7F7",
@@ -32,20 +34,11 @@ const config: Config = {
       },
       fontFamily: {
         "inter": ["var(--font-inter-sans)"],
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-      },
-      boxShadow: {
-        100: "2px 2px 0px 0px rgb(0, 0, 0)",
-        200: "2px 2px 0px 2px rgb(0, 0, 0)",
-        300: "2px 2px 0px 2px rgb(238, 43, 105)",
+		"oxanium": ["var(--font-oxanium)"]
       },
     },
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 };
 
-export default config;
+export default config; 

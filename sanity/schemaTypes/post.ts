@@ -17,7 +17,7 @@ export const post = defineType({
       },
     }),
     defineField({
-      name: "writer",
+      name: "author",
       type: "reference",
       to: { type: "user" },
     }),
@@ -31,7 +31,8 @@ export const post = defineType({
       }),
     defineField({
       name: "category",
-      type: "string",
+      type: "reference",
+      to: { type: "category" },
     }),
     defineField({
       name: "post",

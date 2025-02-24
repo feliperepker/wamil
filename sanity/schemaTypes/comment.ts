@@ -24,5 +24,9 @@ export const comment = defineType({
         type: "reference",
         to: { type: "comment" },
       }),
+      defineField({
+        name: "likes",
+        type: "number",
+      }),
   ],
 });  
