@@ -23,12 +23,16 @@ export const post = defineType({
     }),
     defineField({
       name: "views",
-      type: "number",
+      type: "array",
+      title: "Views",
+      of: [{ type: "reference", to: { type: "user" } }],
     }),
     defineField({
-        name: "likes",
-        type: "number",
-      }),
+      name: "likes",
+      type: "array",
+      title: "Likes",
+      of: [{ type: "reference", to: { type: "user" } }],
+    }),
     defineField({
       name: "category",
       type: "reference",

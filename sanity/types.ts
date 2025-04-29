@@ -150,7 +150,13 @@ export type Comment = {
     _weak?: boolean;
     [internalGroqTypeReferenceTo]?: "comment";
   };
-  likes?: number;
+  likes?: Array<{
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    _key: string;
+    [internalGroqTypeReferenceTo]?: "user";
+  }>;
 };
 
 export type Post = {
@@ -167,8 +173,20 @@ export type Post = {
     _weak?: boolean;
     [internalGroqTypeReferenceTo]?: "user";
   };
-  views?: number;
-  likes?: number;
+  views?: Array<{
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    _key: string;
+    [internalGroqTypeReferenceTo]?: "user";
+  }>;
+  likes?: Array<{
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    _key: string;
+    [internalGroqTypeReferenceTo]?: "user";
+  }>;
   category?: {
     _ref: string;
     _type: "reference";

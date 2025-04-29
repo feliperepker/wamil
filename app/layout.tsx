@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { Inter, Oxanium } from "next/font/google";
 import "./globals.css";
-import 'easymde/dist/easymde.min.css';
+import "easymde/dist/easymde.min.css";
 
 const interSans = Inter({
   variable: "--font-inter-sans",
-  subsets: ['latin']
+  subsets: ["latin"],
 });
 
 const oxanium = Oxanium({
   variable: "--font-oxanium",
-  subsets: ['latin']
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body 
+      <body
         className={`${interSans.variable} ${oxanium.variable} antialiased bg-black-100 text-white`}
       >
         {children}

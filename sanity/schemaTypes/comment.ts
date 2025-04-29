@@ -20,13 +20,15 @@ export const comment = defineType({
       to: { type: "post" },
     }),
     defineField({
-        name: "parentComment",
-        type: "reference",
-        to: { type: "comment" },
-      }),
-      defineField({
-        name: "likes",
-        type: "number",
-      }),
+      name: "parentComment",
+      type: "reference",
+      to: { type: "comment" },
+    }),
+    defineField({
+      name: "likes",
+      type: "array",
+      title: "Likes",
+      of: [{ type: "reference", to: { type: "user" } }],
+    }),
   ],
-});  
+});

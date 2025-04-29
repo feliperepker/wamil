@@ -21,8 +21,11 @@
   .flex-between {
     @apply flex justify-between items-center;
   }
-  .btn-secondary{
-    @apply font-oxanium rounded bg-secondary font-medium transition-all duration-500 text-sm text-gray-700 p-2 hover:bg-[#29bbf0ab] !important;
+  .btn-secondary {
+    @apply font-oxanium rounded bg-secondary font-medium transition-all duration-500 text-sm text-gray-800 p-2 hover:bg-[#29bbf0ab] !important;
+  }
+  .default-input {
+    @apply w-full p-2 bg-black-100 resize-none rounded text-sm border-none focus:border-none text-white focus:outline-none focus:ring-0;
   }
 }
 body {
@@ -43,3 +46,10 @@ body {
   border: 2px solid #272c2e;
 }
 
+.w-md-editor-toolbar {
+  background-color: #272c2e !important;
+}
+
+.wmde-markdown {
+  background-color: #272c2e !important;
+}
