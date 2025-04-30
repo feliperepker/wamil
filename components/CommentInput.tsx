@@ -1,16 +1,24 @@
 import { LoaderIcon, SendHorizonal } from "lucide-react";
-import { FormEvent, RefObject, useRef, useState } from "react";
+import { FormEvent, RefObject, useEffect, useRef, useState } from "react";
+import { CommentType } from "./CommentViewer";
 
 const CommentInput = ({
   sendComment,
   hSize,
   placeholder,
   loadingComment,
+  comment,
+  starterComment,
 }: {
-  sendComment: (textAreaRef: RefObject<HTMLTextAreaElement | null>) => void;
+  sendComment: (
+    textAreaRef: RefObject<HTMLTextAreaElement | null>,
+    commentId?: CommentType
+  ) => void;
   hSize: number;
   placeholder: string;
   loadingComment: boolean;
+  comment?: CommentType;
+  starterComment?: string;
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [hasScrollbar, setHasScrollbar] = useState(false);
@@ -22,6 +30,13 @@ const CommentInput = ({
       setHasScrollbar(textarea.scrollHeight > textarea.clientHeight);
     }
   };
+
+  useEffect(() => {
+    if (starterComment && textareaRef.current) {
+      textareaRef.current.value = starterComment ?? "";
+      textareaRef.current.focus();
+    }
+  }, [starterComment]);
 
   return (
     <div className="relative max-w-full mt-4">
@@ -35,11 +50,17 @@ const CommentInput = ({
         onBlur={() => setIsFocused(false)}
         onInput={checkScrollbar}
         style={{ height: `${hSize}px` }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendComment(textareaRef, comment);
+          }
+        }}
       />
       {isFocused && (
         <button
           onClick={() => {
-            sendComment(textareaRef);
+            sendComment(textareaRef, comment);
           }}
           onMouseDown={(e) => e.preventDefault()}
           type="submit"

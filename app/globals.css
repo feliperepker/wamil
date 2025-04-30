@@ -24,6 +24,9 @@
   .btn-secondary {
     @apply font-oxanium rounded bg-secondary font-medium transition-all duration-500 text-sm text-gray-800 p-2 hover:bg-[#29bbf0ab] !important;
   }
+  .btn-cancel {
+    @apply font-oxanium rounded border-primary border-[1px] bg-transparent text-primary font-medium transition-all duration-500 text-sm  p-2 hover:bg-[#f0902930] !important;
+  }
   .default-input {
     @apply w-full p-2 bg-black-100 resize-none rounded text-sm border-none focus:border-none text-white focus:outline-none focus:ring-0;
   }

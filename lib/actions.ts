@@ -7,7 +7,6 @@ import { writeClient } from "@/sanity/lib/write-client";
 import { Category } from "@/sanity/types";
 import { ALL_CATEGORIES_QUERY } from "@/sanity/lib/queries";
 import { client } from "@/sanity/lib/client";
-import { post } from "@/sanity/schemaTypes/post";
 
 export const createPostAction = async (form: FormData, post: string) => {
   const session = await auth();
@@ -56,11 +55,11 @@ export const createPostAction = async (form: FormData, post: string) => {
   }
 };
 
-export const fetchCategories = async (): Promise<Category[]> => {
+export const fetchCategoriesAction = async (): Promise<Category[]> => {
   return await client.fetch(ALL_CATEGORIES_QUERY);
 };
 
-export const addLike = async (id: string) => {
+export const addLikeAction = async (id: string) => {
   const session = await auth();
 
   if (!session)
@@ -85,7 +84,7 @@ export const addLike = async (id: string) => {
   }
 };
 
-export const removeLike = async (id: string) => {
+export const removeLikeAction = async (id: string) => {
   const session = await auth();
 
   if (!session)
@@ -108,7 +107,7 @@ export const removeLike = async (id: string) => {
   }
 };
 
-export const getUserId = async () => {
+export const getUserIdAction = async () => {
   const session = await auth();
 
   if (!session)
@@ -120,7 +119,7 @@ export const getUserId = async () => {
   return session.id;
 };
 
-export const addUserView = async (postId: string) => {
+export const addUserViewAction = async (postId: string) => {
   const session = await auth();
 
   if (!session)
@@ -145,7 +144,7 @@ export const addUserView = async (postId: string) => {
   }
 };
 
-export const createComment = async (comment: string, postId: string) => {
+export const createCommentAction = async (comment: string, postId: string) => {
   const session = await auth();
   if (!session)
     return parseServerActionResponse({
@@ -184,7 +183,7 @@ export const createComment = async (comment: string, postId: string) => {
   }
 };
 
-export const deleteComment = async (commentId: string) => {
+export const deleteCommentAction = async (commentId: string) => {
   const session = await auth();
   if (!session)
     return parseServerActionResponse({
@@ -193,10 +192,124 @@ export const deleteComment = async (commentId: string) => {
     });
 
   try {
-    await writeClient.delete(commentId);
+    const replies = await writeClient.fetch(
+      `*[_type == "comment" && parentComment._ref == $commentId]._id`,
+      { commentId }
+    );
+
+    const idsToDelete = [commentId, ...replies];
+
+    const transaction = idsToDelete.reduce(
+      (tx, id) => tx.delete(id),
+      writeClient.transaction()
+    );
+
+    await transaction.commit();
 
     return parseServerActionResponse({
       status: "SUCCESS",
+      error: "",
+    });
+  } catch (error) {
+    return parseServerActionResponse({
+      status: "ERROR",
+      error: JSON.stringify(error),
+    });
+  }
+};
+
+export const createReplyAction = async (
+  commentText: string,
+  commentId: string
+) => {
+  const session = await auth();
+  if (!session)
+    return parseServerActionResponse({
+      status: "ERROR",
+      error: "Not signed in",
+    });
+
+  try {
+    const postObject = {
+      comment: commentText,
+      parentComment: {
+        _type: "reference",
+        _ref: commentId,
+      },
+      user: {
+        _type: "reference",
+        _ref: session.id,
+      },
+    };
+
+    const result = await writeClient.create({
+      _type: "comment",
+      ...postObject,
+    });
+
+    return parseServerActionResponse({
+      status: "SUCCESS",
+      id: result._id,
+      error: "",
+    });
+  } catch (error) {
+    return parseServerActionResponse({
+      status: "ERROR",
+      error: JSON.stringify(error),
+    });
+  }
+};
+
+export const editCommentAction = async (
+  commentText: string,
+  commentId: string
+) => {
+  const session = await auth();
+  if (!session)
+    return parseServerActionResponse({
+      status: "ERROR",
+      error: "Not signed in",
+    });
+
+  try {
+    const result = await writeClient
+      .patch(commentId)
+      .set({ comment: commentText })
+      .commit();
+
+    return parseServerActionResponse({
+      status: "SUCCESS",
+      id: result._id,
+      error: "",
+    });
+  } catch (error) {
+    return parseServerActionResponse({
+      status: "ERROR",
+      error: JSON.stringify(error),
+    });
+  }
+};
+
+export const editPostAction = async (
+  postEditContent: string,
+  postId: string
+) => {
+  const session = await auth();
+  if (!session)
+    return parseServerActionResponse({
+      status: "ERROR",
+      error: "Not signed in",
+    });
+
+  try {
+    const result = await writeClient
+      .patch(postId)
+      .set({ post: postEditContent })
+      .commit();
+
+    return parseServerActionResponse({
+      status: "SUCCESS",
+      id: result._id,
       error: "",
     });
   } catch (error) {

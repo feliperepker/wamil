@@ -55,6 +55,18 @@ export const COMMENTS_ON_POSTS_QUERY =
   }, 
   likes,
   _createdAt,
-  "totalReplies": count(*[_type == "comment" && parentComment._ref == _id]),
-  "userLiked": $userId in likes[]._ref
+  "totalReplies": count(*[_type == "comment" && parentComment._ref == ^._id]),
+  "userLiked": $userCall in coalesce(likes[]._ref, [])
+}`);
+
+export const REPLYES_ON_COMMENTS_QUERY =
+  defineQuery(`*[_type == "comment" && parentComment._ref == $commentId] {
+    _id,
+    comment,
+    user -> {
+    _id, name, image, bio, username
+  }, 
+  likes,
+  _createdAt,
+  "userLiked": $userId in coalesce(likes[]._ref, [])
 }`);

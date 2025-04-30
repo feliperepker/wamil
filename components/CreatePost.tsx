@@ -16,7 +16,7 @@ import { Send } from "lucide-react";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { Category } from "@/sanity/types";
-import { createPostAction, fetchCategories } from "@/lib/actions";
+import { createPostAction, fetchCategoriesAction } from "@/lib/actions";
 
 const CreatePost = () => {
   const [openCreatePost, setOpenCreatePost] = useState<boolean>(false);
@@ -29,7 +29,7 @@ const CreatePost = () => {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const data = await fetchCategories();
+        const data = await fetchCategoriesAction();
         setCategories(data);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
