@@ -1,9 +1,13 @@
 import { formatDate } from "@/lib/utils";
-import { Reply, ThumbsUp } from "lucide-react";
+import { Reply, ThumbsUp, X } from "lucide-react";
 import { Comment, User } from "@/sanity/types";
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import CommentInput from "./CommentInput";
 import InteractiveIcon from "./InteractiveIcon";
+import { client } from "@/sanity/lib/client";
+import { COMMENTS_ON_POSTS_QUERY } from "@/sanity/lib/queries";
+import { addLike, deleteComment, getUserId, removeLike } from "@/lib/actions";
+import { useToast } from "@/hooks/use-toast";
 
 export type CommentType = Omit<
   Comment,
@@ -11,43 +15,50 @@ export type CommentType = Omit<
 > & {
   user?: User;
   totalReplies?: number;
+  userLiked?: boolean;
 };
 
-const CommentViewer = ({ postId }: { postId: string }) => {
+export type CommentViewerHandle = {
+  getComments: () => void;
+};
+const CommentViewer = forwardRef<
+  CommentViewerHandle,
+  {
+    postId: string;
+    totalComments: number;
+    setTotalComments: (totalComments: number) => void;
+  }
+>(({ postId, setTotalComments, totalComments }, ref) => {
   const [comments, setComments] = useState<CommentType[]>([]);
   const [seeReply, setSeeReply] = useState<boolean>(false);
+  const [loadingComment, setLoadingComment] = useState<boolean>(false);
+  const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string>("");
+  const { toast } = useToast();
 
   const [parentComments, setParentComments] = useState<CommentType[]>([]);
 
+  const getComments = async () => {
+    const comments = await client.fetch(COMMENTS_ON_POSTS_QUERY, {
+      postId,
+      userId,
+    });
+    setComments(comments ?? []);
+  };
+
+  useImperativeHandle(ref, () => ({
+    getComments,
+  }));
+
+  const getUserCall = async () => {
+    var userCall = await getUserId();
+    if (typeof userCall === "string") {
+      setUserId(userCall);
+      getComments();
+    }
+  };
   useEffect(() => {
-    setComments([
-      {
-        _id: "comment123",
-        _type: "comment",
-        _createdAt: "2025-02-23T14:00:00Z",
-        _updatedAt: "2025-02-23T14:30:00Z",
-        _rev: "r1",
-        comment: "Este é um comentário de teste.",
-        post: {
-          _type: "reference",
-          _ref: "post456",
-        },
-        likes: [{ _ref: "user789", _type: "reference", _key: "like1" }],
-        user: {
-          _id: "user123",
-          _type: "user",
-          _createdAt: "2023-01-15T09:30:00Z",
-          _updatedAt: "2025-02-20T12:00:00Z",
-          _rev: "r1",
-          name: "Carlos Silva",
-          username: "carlosjs",
-          email: "carlos.silva@email.com",
-          image: "https://placehold.co/68x68",
-          bio: "Desenvolvedor Front-end apaixonado por JavaScript e novas tecnologias.",
-        },
-        totalReplies: 1,
-      },
-    ]);
+    getUserCall();
   }, []);
 
   const openCommentsReply = () => {
@@ -83,6 +94,71 @@ const CommentViewer = ({ postId }: { postId: string }) => {
     ]);
   };
 
+  const handleDeleteComment = async (comment: CommentType) => {
+    try {
+      setLoadingDelete(true);
+      const result = await deleteComment(comment._id);
+      if (result.status === "SUCCESS") {
+        setTotalComments(totalComments - 1);
+        getComments();
+        toast({
+          title: "Success",
+          description: "Your comment has been created successfully",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error has occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingDelete(false);
+    }
+  };
+
+  const handleLikeComment = async (comment: CommentType) => {
+    try {
+      let result;
+      const commentsArray = [...comments];
+      const localLikes = comment.likes ?? [];
+      const commentState = commentsArray.find((c) => c._id === comment._id);
+
+      const userLiked = localLikes.some((like) => like._ref === userId);
+      if (typeof userId !== "string") {
+        alert("Not signed in");
+      } else {
+        if (userLiked) {
+          result = await removeLike(comment._id);
+
+          commentState?.likes?.splice(
+            commentState?.likes?.findIndex((l) => l._ref === userId)
+          );
+          if (commentState) {
+            commentState.userLiked = false;
+          }
+        } else {
+          result = await addLike(comment._id);
+
+          commentState?.likes?.push({
+            _key: userId,
+            _ref: userId,
+            _type: "reference",
+          });
+          if (commentState) {
+            commentState.userLiked = true;
+          }
+        }
+        setComments(commentsArray);
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error while trying to handle likes:", error);
+      return { status: "ERROR", error };
+    }
+  };
+
   const replyComment = () => {};
 
   return (
@@ -98,22 +174,40 @@ const CommentViewer = ({ postId }: { postId: string }) => {
                   className="rounded-full w-8 h-8"
                 />
                 <div>
-                  <div className="leading-none flex gap-1 font-oxanium">
+                  <div className="leading-none flex justify-between items-center gap-1 font-oxanium">
                     <p className="text-sm text-gray-300">
                       @{comment.user?.username}
                     </p>
                     <p className="text-sm text-gray-500">
                       {formatDate(comment._createdAt)}
                     </p>
+                    {comment.user?._id == userId && (
+                      <button
+                        disabled={loadingDelete}
+                        onClick={() => {
+                          handleDeleteComment(comment);
+                        }}
+                      >
+                        <X
+                          className="ml-1 mb-1 text-gray-500 hover:text-gray-300 transition-all"
+                          size={12}
+                        />
+                      </button>
+                    )}
                   </div>
                   <p>{comment.comment}</p>
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="flex items-center gap-1 group">
-                  <InteractiveIcon icon={ThumbsUp} />
+                <button
+                  onClick={() => {
+                    handleLikeComment(comment);
+                  }}
+                  className="flex items-center gap-1 group"
+                >
+                  <InteractiveIcon filled={comment.userLiked} icon={ThumbsUp} />
                   <span className="text-sm font-oxanium">
-                    {comment.likes?.length}
+                    {comment.likes?.length ?? 0}
                   </span>
                 </button>
                 <button
@@ -122,7 +216,7 @@ const CommentViewer = ({ postId }: { postId: string }) => {
                 >
                   <InteractiveIcon icon={Reply} />
                   <span className="text-sm font-oxanium">
-                    {comment.totalReplies}
+                    {comment.totalReplies ?? 0}
                   </span>
                 </button>
               </div>
@@ -141,6 +235,7 @@ const CommentViewer = ({ postId }: { postId: string }) => {
                     sendComment={replyComment}
                     hSize={56}
                     placeholder="Write a reply"
+                    loadingComment
                   />
                 </div>
               )}
@@ -152,7 +247,7 @@ const CommentViewer = ({ postId }: { postId: string }) => {
       )}
     </>
   );
-};
+});
 
 const ParentComments = ({ commentObject }: { commentObject: CommentType }) => {
   const {

@@ -33,6 +33,9 @@ const PostCard = ({ post }: { post: PostCardType }) => {
   const [totalViews, setTotalViews] = useState<number>(
     post?.views?.length || 0
   );
+  const [totalComments, setTotalComments] = useState<number>(
+    post?.totalComments || 0
+  );
 
   const openPost = () => setSelectedPost(post);
   const closePost = () => setSelectedPost(null);
@@ -54,9 +57,7 @@ const PostCard = ({ post }: { post: PostCardType }) => {
             </div>
             <div className="flex items-center space-x-1">
               <MessageCircle className="size-4 items-center text-primary" />
-              <span className="text-xs font-oxanium">
-                {post?.totalComments}
-              </span>
+              <span className="text-xs font-oxanium">{totalComments}</span>
             </div>
             <div className="flex items-center space-x-1">
               <EyeIcon className="size-4 text-primary" />
@@ -110,6 +111,8 @@ const PostCard = ({ post }: { post: PostCardType }) => {
           totalLikes={totalLikes}
           setTotalViews={setTotalViews}
           totalViews={totalViews}
+          totalComments={totalComments}
+          setTotalComments={setTotalComments}
         />
       )}
     </>

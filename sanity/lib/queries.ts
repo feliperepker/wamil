@@ -45,3 +45,16 @@ export const VIEWS_LIKES_ON_POSTS_QUERY =
     likes,
     views
 }`);
+
+export const COMMENTS_ON_POSTS_QUERY =
+  defineQuery(`*[_type == "comment" && post._ref == $postId && parentComment == null] {
+    _id,
+    comment,
+    user -> {
+    _id, name, image, bio, username
+  }, 
+  likes,
+  _createdAt,
+  "totalReplies": count(*[_type == "comment" && parentComment._ref == _id]),
+  "userLiked": $userId in likes[]._ref
+}`);

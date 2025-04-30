@@ -1,19 +1,22 @@
 import { PostCardType } from "./PostCard";
 import markdownit from "markdown-it";
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { EyeIcon, MessageCircle, ThumbsUp, X } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import CommentViewer from "./CommentViewer";
+import { formSchema } from "@/lib/validation";
+import CommentViewer, { CommentViewerHandle } from "./CommentViewer";
 import CommentInput from "./CommentInput";
 import InteractiveIcon from "./InteractiveIcon";
 import {
-  addPostLike,
+  addLike,
   addUserView,
+  createComment,
   getUserId,
-  removePostLike,
+  removeLike,
 } from "@/lib/actions";
 import { client } from "@/sanity/lib/client";
 import { VIEWS_LIKES_ON_POSTS_QUERY } from "@/sanity/lib/queries";
+import { useToast } from "@/hooks/use-toast";
 interface ViewProps {
   _ref: string;
   _type: "reference";
@@ -32,24 +35,26 @@ const PostViewer = ({
   totalLikes,
   setTotalViews,
   totalViews,
+  setTotalComments,
+  totalComments,
 }: {
   post: PostCardType;
   onClose: () => void;
   setTotalLikes: (likes: number) => void;
   totalLikes: number;
-  setTotalViews: (likes: number) => void;
+  setTotalViews: (views: number) => void;
   totalViews: number;
+  setTotalComments: (comment: number) => void;
+  totalComments: number;
 }) => {
   const parsedContent = md.render(post.post || "");
   const [seeComments, setSeeComments] = useState<boolean>(false);
   const [userLiked, setUserLiked] = useState<boolean>(false);
+  const [loadingComment, setLoadingComment] = useState<boolean>(false);
+  const { toast } = useToast();
+  const commentViewerRef = useRef<CommentViewerHandle>(null);
 
-  const {
-    _id,
-    _createdAt,
-    totalComments,
-    author: { image, username, name } = {},
-  } = post;
+  const { _id, _createdAt, author: { image, username, name } = {} } = post;
 
   useEffect(() => {
     const fetchPostData = async () => {
@@ -72,12 +77,12 @@ const PostViewer = ({
     const userId = await getUserId();
     const userView = localViews.some((view: ViewProps) => view._ref === userId);
 
-    console.log(userView);
-    if (!userView) {
+    if (!userView && typeof userId === "string") {
       await addUserView(_id);
       setTotalViews(localViews.length + 1);
     }
   };
+
   const handleUserLiked = async (postData: PostCardType) => {
     const userId = await getUserId();
     const localLikes = postData.likes ?? [];
@@ -88,16 +93,22 @@ const PostViewer = ({
   const handleLike = async () => {
     try {
       let result;
+      const userId = await getUserId();
 
-      if (userLiked) {
-        result = await removePostLike(_id);
-        setTotalLikes(totalLikes - 1);
-        setUserLiked(false);
+      if (typeof userId !== "string") {
+        alert("Not signed in");
       } else {
-        result = await addPostLike(_id);
-        setTotalLikes(totalLikes + 1);
-        setUserLiked(true);
+        if (userLiked) {
+          result = await removeLike(_id);
+          setTotalLikes(totalLikes - 1);
+          setUserLiked(false);
+        } else {
+          result = await addLike(_id);
+          setTotalLikes(totalLikes + 1);
+          setUserLiked(true);
+        }
       }
+
       return result;
     } catch (error) {
       console.error("Error while trying to handle likes:", error);
@@ -105,7 +116,46 @@ const PostViewer = ({
     }
   };
 
-  const writeNewComment = () => {};
+  const writeNewComment = async (
+    textareaRef: RefObject<HTMLTextAreaElement | null>
+  ) => {
+    try {
+      setLoadingComment(true);
+
+      const comment = textareaRef.current?.value;
+
+      if (comment) {
+        const result = await createComment(comment, _id);
+
+        if (result.status === "SUCCESS") {
+          setTotalComments(totalComments + 1);
+          commentViewerRef.current?.getComments();
+
+          toast({
+            title: "Success",
+            description: "Your comment has been created successfully",
+          });
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: "Please, fill the comment before sending",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error has occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingComment(false);
+      if (textareaRef.current) {
+        textareaRef.current.value = "";
+      }
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-[#1111119f] flex items-center justify-center p-6 z-50">
@@ -133,7 +183,6 @@ const PostViewer = ({
           </div>
         </div>
 
-        <div className="divder"></div>
         <article
           className="prose overflow-y-auto prose-invert mt-4 break-words text-base w-full max-h-[82%]"
           dangerouslySetInnerHTML={{ __html: parsedContent }}
@@ -168,13 +217,17 @@ const PostViewer = ({
                 sendComment={writeNewComment}
                 hSize={80}
                 placeholder="Write a comment"
+                loadingComment={loadingComment}
               />
             </div>
-
             <div className="divider"></div>
             <h3 className="font-oxanium">Comments</h3>
-
-            <CommentViewer postId={post._id} />
+            <CommentViewer
+              setTotalComments={setTotalComments}
+              totalComments={totalComments}
+              ref={commentViewerRef}
+              postId={_id}
+            />
           </>
         )}
         <div></div>

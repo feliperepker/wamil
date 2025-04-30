@@ -7,6 +7,7 @@ import { writeClient } from "@/sanity/lib/write-client";
 import { Category } from "@/sanity/types";
 import { ALL_CATEGORIES_QUERY } from "@/sanity/lib/queries";
 import { client } from "@/sanity/lib/client";
+import { post } from "@/sanity/schemaTypes/post";
 
 export const createPostAction = async (form: FormData, post: string) => {
   const session = await auth();
@@ -59,7 +60,7 @@ export const fetchCategories = async (): Promise<Category[]> => {
   return await client.fetch(ALL_CATEGORIES_QUERY);
 };
 
-export const addPostLike = async (postId: string) => {
+export const addLike = async (id: string) => {
   const session = await auth();
 
   if (!session)
@@ -69,7 +70,7 @@ export const addPostLike = async (postId: string) => {
     });
   try {
     await writeClient
-      .patch(postId)
+      .patch(id)
       .setIfMissing({ likes: [] })
       .append("likes", [
         { _type: "reference", _ref: session?.id, _key: session?.id },
@@ -84,7 +85,7 @@ export const addPostLike = async (postId: string) => {
   }
 };
 
-export const removePostLike = async (postId: string) => {
+export const removeLike = async (id: string) => {
   const session = await auth();
 
   if (!session)
@@ -94,7 +95,7 @@ export const removePostLike = async (postId: string) => {
     });
   try {
     await writeClient
-      .patch(postId)
+      .patch(id)
       .unset([`likes[_ref=="${session?.id}"]`])
       .commit();
 
@@ -136,6 +137,68 @@ export const addUserView = async (postId: string) => {
       ])
       .commit();
     return { status: "SUCCESS", message: "View added" };
+  } catch (error) {
+    return parseServerActionResponse({
+      status: "ERROR",
+      error: JSON.stringify(error),
+    });
+  }
+};
+
+export const createComment = async (comment: string, postId: string) => {
+  const session = await auth();
+  if (!session)
+    return parseServerActionResponse({
+      status: "ERROR",
+      error: "Not signed in",
+    });
+
+  try {
+    const postObject = {
+      comment,
+      post: {
+        _type: "reference",
+        _ref: postId,
+      },
+      user: {
+        _type: "reference",
+        _ref: session.id,
+      },
+    };
+
+    const result = await writeClient.create({
+      _type: "comment",
+      ...postObject,
+    });
+
+    return parseServerActionResponse({
+      status: "SUCCESS",
+      id: result._id,
+      error: "",
+    });
+  } catch (error) {
+    return parseServerActionResponse({
+      status: "ERROR",
+      error: JSON.stringify(error),
+    });
+  }
+};
+
+export const deleteComment = async (commentId: string) => {
+  const session = await auth();
+  if (!session)
+    return parseServerActionResponse({
+      status: "ERROR",
+      error: "Not signed in",
+    });
+
+  try {
+    await writeClient.delete(commentId);
+
+    return parseServerActionResponse({
+      status: "SUCCESS",
+      error: "",
+    });
   } catch (error) {
     return parseServerActionResponse({
       status: "ERROR",
