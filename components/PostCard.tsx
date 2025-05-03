@@ -6,6 +6,7 @@ import { Category, Comment, Post, User } from "@/sanity/types";
 import { EyeIcon, MessageCircle, ThumbsUp } from "lucide-react";
 import markdownit from "markdown-it";
 import PostViewer from "./PostViewer";
+import Link from "next/link";
 
 const md = markdownit({
   breaks: true,
@@ -67,20 +68,22 @@ const PostCard = ({ post }: { post: PostCardType }) => {
         </div>
         <div className="flex items-end justify-between mt-3 font-oxanium">
           <div>
-            <p className="font-oxanium text-sm font-extralight">
-              {post?.author?.name}
-            </p>
+            <Link href={`/profile/${post?.author?._id}`}>
+              <p className="font-oxanium text-sm font-extralight">
+                {post?.author?.name}
+              </p>
+            </Link>
             <h3 className="line-clamp-1 font-bold text-xl max-w-[98%]">
               {post?.title}
             </h3>
           </div>
-          <div>
+          <Link href={`/profile/${post?.author?._id}`}>
             <img
               src={post?.author?.image}
               alt="user icon"
               className="size-10 rounded-full"
             />
-          </div>
+          </Link>
         </div>
 
         {parsedContent ? (
@@ -95,7 +98,12 @@ const PostCard = ({ post }: { post: PostCardType }) => {
         )}
 
         <div className="mt-auto flex justify-between items-end">
-          <p className="font-oxanium text-sm">{post.category?.category}</p>
+          <Link
+            href={`/?query=${post.category?.category}`}
+            className="font-oxanium text-sm"
+          >
+            {post.category?.category}
+          </Link>
 
           <Button className="btn-secondary" onClick={openPost}>
             Read more

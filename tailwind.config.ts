@@ -1,4 +1,4 @@
-import type {Config} from "tailwindcss";
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   darkMode: ["class"],
@@ -13,15 +13,15 @@ const config: Config = {
       typography: {
         DEFAULT: {
           css: {
-            maxWidth: '100vw', 
-          }
-        }
+            maxWidth: "100vw",
+          },
+        },
       },
       screens: {
-        xs: "475px"
+        xs: "475px",
       },
       colors: {
-        primary:  "#F09029",
+        primary: "#F09029",
         secondary: "#29BBF0",
         black: {
           "100": "#272c2e",
@@ -33,12 +33,12 @@ const config: Config = {
         },
       },
       fontFamily: {
-        "inter": ["var(--font-inter-sans)"],
-		"oxanium": ["var(--font-oxanium)"]
+        inter: ["var(--font-inter-sans)"],
+        oxanium: ["var(--font-oxanium)"],
       },
     },
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 };
 
-export default config; 
+export default config;

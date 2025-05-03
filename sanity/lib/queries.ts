@@ -23,7 +23,7 @@ export const ALL_CATEGORIES_QUERY =
 }`);
 
 export const ALL_POSTS_QUERY =
-  defineQuery(`*[_type == "post"] | order(_createdAt asc) {
+  defineQuery(`*[_type == "post" && !defined($search) || title match $search || category->category match $search || author->name match $search] | order(_createdAt asc) {
   _id, 
   title, 
   slug,

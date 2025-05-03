@@ -271,8 +271,14 @@ const PostViewer = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-[#1111119f] flex items-center justify-center p-6 z-50">
-      <div className="bg-black w-full overflow-y-auto max-w-3xl p-4 rounded-lg shadow-lg max-h-full">
+    <div
+      className="fixed inset-0 bg-[#1111119f] flex items-center justify-center p-6 z-50"
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-black w-full overflow-y-auto max-w-3xl p-4 rounded-lg shadow-lg max-h-full"
+      >
         <div className="flex justify-between items-start">
           <h2 className="font-oxanium text-xl font-semibold max-w-[90%]">
             {post.title}

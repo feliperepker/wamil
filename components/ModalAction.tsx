@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
+import { set } from "sanity";
 
 const ModalAction = ({
   title,
@@ -14,8 +15,19 @@ const ModalAction = ({
   const [isPending, setIsPending] = useState<boolean>(false);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-[#000] bg-opacity-20 z-50">
-      <div className="bg-black overflow-y-auto p-4 rounded-lg shadow-lg ">
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-[#000] bg-opacity-20 z-50"
+      onClick={(e) => {
+        e.stopPropagation();
+        setModalOpen(false);
+      }}
+    >
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        className="bg-black overflow-y-auto p-4 rounded-lg shadow-lg "
+      >
         <div className="flex justify-between items-start">
           <h2 className="font-oxanium text-xl font-semibold max-w-[90%]">
             {title}

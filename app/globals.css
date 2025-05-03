@@ -27,6 +27,9 @@
   .btn-primary {
     @apply font-oxanium rounded bg-primary font-medium transition-all duration-500 text-sm text-black p-2 hover:bg-[#f09029a2] !important;
   }
+  .btn-clean {
+    @apply font-oxanium rounded border-[1px] font-medium transition-all duration-500 text-sm text-gray-300 p-2 hover:bg-[#454545ab] mt-4 !important;
+  }
   .btn-cancel {
     @apply font-oxanium rounded border-primary border-[1px] bg-transparent text-primary font-medium transition-all duration-500 text-sm  p-2 hover:bg-[#f0902930] !important;
   }
@@ -34,6 +37,7 @@
     @apply w-full p-2 bg-black-100 resize-none rounded text-sm border-none focus:border-none text-white focus:outline-none focus:ring-0;
   }
 }
+
 body {
   color: var(--foreground);
   background: var(--background);
