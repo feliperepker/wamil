@@ -1,6 +1,7 @@
 import { LoaderIcon, SendHorizonal } from "lucide-react";
 import { FormEvent, RefObject, useEffect, useRef, useState } from "react";
 import { CommentType } from "./CommentViewer";
+import Spinner from "./Spinner";
 
 const CommentInput = ({
   sendComment,
@@ -68,7 +69,7 @@ const CommentInput = ({
           className={`absolute bottom-0 ${hasScrollbar ? "right-5" : "right-2"} rounded-full p-2 -translate-y-1/2 bg-secondary text-white transition-all`}
         >
           {loadingComment ? (
-            <LoaderIcon className="size-5" />
+            <Spinner size={20} />
           ) : (
             <SendHorizonal className="size-5" />
           )}

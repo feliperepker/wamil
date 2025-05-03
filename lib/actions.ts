@@ -128,14 +128,22 @@ export const addUserViewAction = async (postId: string) => {
       error: "Not signed in",
     });
   try {
-    await writeClient
-      .patch(postId)
-      .setIfMissing({ views: [] })
-      .append("views", [
-        { _type: "reference", _ref: session?.id, _key: session?.id },
-      ])
-      .commit();
-    return { status: "SUCCESS", message: "View added" };
+    const checkLike = await writeClient.fetch(
+      `*[_type == "post" && _id == $postId && $userId in views[]._ref]._id`,
+      { postId, userId: session.id }
+    );
+
+    if (checkLike.length === 0) {
+      await writeClient
+        .patch(postId)
+        .setIfMissing({ views: [] })
+        .append("views", [
+          { _type: "reference", _ref: session?.id, _key: session?.id },
+        ])
+        .commit();
+      return { status: "SUCCESS", message: "View added" };
+    }
+    return { status: "SUCCESS", message: "User already in views" };
   } catch (error) {
     return parseServerActionResponse({
       status: "ERROR",
@@ -310,6 +318,38 @@ export const editPostAction = async (
     return parseServerActionResponse({
       status: "SUCCESS",
       id: result._id,
+      error: "",
+    });
+  } catch (error) {
+    return parseServerActionResponse({
+      status: "ERROR",
+      error: JSON.stringify(error),
+    });
+  }
+};
+
+export const deletePostAction = async (postId: string) => {
+  const session = await auth();
+  if (!session)
+    return parseServerActionResponse({
+      status: "ERROR",
+      error: "Not signed in",
+    });
+
+  try {
+    const comments: string[] = await writeClient.fetch(
+      `*[_type == "comment" && post._ref == $postId]._id`,
+      { postId }
+    );
+
+    await Promise.all(
+      comments.map((commentId) => deleteCommentAction(commentId))
+    );
+
+    await writeClient.delete(postId);
+
+    return parseServerActionResponse({
+      status: "SUCCESS",
       error: "",
     });
   } catch (error) {

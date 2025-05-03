@@ -6,7 +6,7 @@ const Navbar = async () => {
 
   return (
     <header>
-      <nav className="flex justify-between items-center p-4 bg-black shadow-md">
+      <nav className="flex justify-between items-center p-4 bg-black shadow-lg">
         <Link href="/">
           <img src="./wamil-logo.png" alt="" className="max-w-24" />
         </Link>

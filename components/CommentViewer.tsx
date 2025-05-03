@@ -14,7 +14,7 @@ import {
   getUserIdAction,
   removeLikeAction,
 } from "@/lib/actions";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 export type CommentType = Omit<
   Comment,
@@ -44,7 +44,6 @@ const CommentViewer = ({
   const [likesState, setLikesState] = useState<number>(0);
   const [userLiked, setUserLiked] = useState<boolean>(false);
   const [userId, setUserId] = useState<string>("");
-  const { toast } = useToast();
   const [parentComments, setParentComments] = useState<CommentType[]>([]);
 
   const getUserCall = async () => {
@@ -317,7 +316,6 @@ const ParentComments = ({
   openCommentsReply: (newSeeReply: boolean) => void;
 }) => {
   const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
-  const { toast } = useToast();
   const [likesState, setLikesState] = useState<number>(0);
   const [userLiked, setUserLiked] = useState<boolean>(false);
   const [editComment, setEditComment] = useState<boolean>(false);

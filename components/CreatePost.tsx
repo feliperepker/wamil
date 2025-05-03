@@ -14,7 +14,7 @@ import MDEditor from "@uiw/react-md-editor";
 import { Button } from "./ui/button";
 import { Send } from "lucide-react";
 import { z } from "zod";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { Category } from "@/sanity/types";
 import { createPostAction, fetchCategoriesAction } from "@/lib/actions";
 
@@ -23,7 +23,6 @@ const CreatePost = () => {
   const [isPending, setIsPending] = useState<boolean>(false);
   const [post, setPost] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { toast } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
@@ -185,7 +184,7 @@ const CreatePost = () => {
 
           <Button
             disabled={isPending}
-            className="btn-secondary self-end mt-2"
+            className="btn-secondary self-end mt-4"
             type="submit"
           >
             {isPending ? "Creating..." : "Create Post"}

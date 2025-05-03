@@ -42,8 +42,7 @@ export const ALL_POSTS_QUERY =
 
 export const VIEWS_LIKES_ON_POSTS_QUERY =
   defineQuery(`*[_type == "post" && _id == $id][0] {
-    likes,
-    views
+    likes
 }`);
 
 export const COMMENTS_ON_POSTS_QUERY =

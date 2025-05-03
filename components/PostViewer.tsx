@@ -3,7 +3,6 @@ import markdownit from "markdown-it";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { EyeIcon, MessageCircle, Send, ThumbsUp, X } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { formSchema } from "@/lib/validation";
 import CommentViewer, { CommentType } from "./CommentViewer";
 import CommentInput from "./CommentInput";
 import InteractiveIcon from "./InteractiveIcon";
@@ -11,6 +10,7 @@ import {
   addLikeAction,
   addUserViewAction,
   createCommentAction,
+  deletePostAction,
   editPostAction,
   getUserIdAction,
   removeLikeAction,
@@ -20,9 +20,11 @@ import {
   COMMENTS_ON_POSTS_QUERY,
   VIEWS_LIKES_ON_POSTS_QUERY,
 } from "@/sanity/lib/queries";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import MDEditor from "@uiw/react-md-editor";
 import { Button } from "./ui/button";
+import ModalAction from "./ModalAction";
+import Spinner from "./Spinner";
 interface ViewProps {
   _ref: string;
   _type: "reference";
@@ -48,8 +50,8 @@ const PostViewer = ({
   onClose: () => void;
   setTotalLikes: (likes: number) => void;
   totalLikes: number;
-  setTotalViews: (views: number) => void;
-  totalViews: number;
+  setTotalViews: (views: string[]) => void;
+  totalViews: string[];
   setTotalComments: (comment: number) => void;
   totalComments: number;
 }) => {
@@ -59,16 +61,17 @@ const PostViewer = ({
   const [seeComments, setSeeComments] = useState<boolean>(false);
   const [userLiked, setUserLiked] = useState<boolean>(false);
   const [loadingComment, setLoadingComment] = useState<boolean>(false);
+  const [loadingCommentSection, setLoadingCommentSection] =
+    useState<boolean>(false);
   const [loadingAction, setLoadingAction] = useState<boolean>(false);
   const [editPost, setEditPost] = useState<boolean>(false);
+  const [modalDelete, setModalDelete] = useState<boolean>(false);
   const [comments, setComments] = useState<CommentType[]>([]);
   const [isPendingEditing, setIsPendingEditing] = useState<boolean>(false);
   const [postEditContent, setPostEditContent] = useState<string>(
     post.post || ""
   );
   const [userId, setUserId] = useState<string>("");
-
-  const { toast } = useToast();
 
   const {
     _id,
@@ -90,12 +93,13 @@ const PostViewer = ({
         id: _id,
       });
       handleUserLiked(postData);
-      handleUserView(postData);
     };
     fetchPostData();
+    handleUserView();
   }, []);
 
   const getComments = async () => {
+    setLoadingCommentSection(true);
     var userCall = await getUserIdAction();
 
     if (typeof userCall === "string") {
@@ -106,6 +110,7 @@ const PostViewer = ({
 
       setComments(commentsCall ?? []);
     }
+    setLoadingCommentSection(false);
   };
 
   const openComments = () => {
@@ -115,15 +120,14 @@ const PostViewer = ({
     setSeeComments(!seeComments);
   };
 
-  const handleUserView = async (postData: PostCardType) => {
-    const localViews = postData.views ?? [];
-
+  const handleUserView = async () => {
     const userId = await getUserIdAction();
-    const userView = localViews.some((view: ViewProps) => view._ref === userId);
+
+    const userView = totalViews.includes(userId);
 
     if (!userView && typeof userId === "string") {
       await addUserViewAction(_id);
-      setTotalViews(localViews.length + 1);
+      setTotalViews([...totalViews, userId]);
     }
   };
 
@@ -238,6 +242,34 @@ const PostViewer = ({
     setPostEditContent(post.post || "");
   };
 
+  const handleDeletePost = async () => {
+    try {
+      setLoadingAction(true);
+      const result = await deletePostAction(_id);
+
+      if (result) {
+        toast({
+          title: "Success",
+          description: "Post deleted successfully.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "An error occurred while deleting the post.",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "An error occurred while deleting the post.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingAction(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-[#1111119f] flex items-center justify-center p-6 z-50">
       <div className="bg-black w-full overflow-y-auto max-w-3xl p-4 rounded-lg shadow-lg max-h-full">
@@ -273,7 +305,7 @@ const PostViewer = ({
                   <button
                     disabled={loadingAction}
                     onClick={() => {
-                      handleDeletePost();
+                      setModalDelete(!modalDelete);
                     }}
                     className=" text-gray-500 hover:text-gray-300 transition-all text-xs"
                   >
@@ -307,7 +339,7 @@ const PostViewer = ({
             <div className="flex gap-2 mt-2">
               <Button
                 disabled={isPendingEditing}
-                className="btn-secondary self-end"
+                className="btn-secondary self-end ml-auto"
                 size="sm"
                 type="submit"
                 onClick={() => {
@@ -357,7 +389,7 @@ const PostViewer = ({
           </button>
           <div className="flex items-center gap-1">
             <EyeIcon className="size-5 text-primary" />
-            <span className="text-sm font-oxanium">{totalViews}</span>
+            <span className="text-sm font-oxanium">{totalViews.length}</span>
           </div>
         </div>
 
@@ -373,19 +405,36 @@ const PostViewer = ({
             </div>
             <div className="divider"></div>
             <h3 className="font-oxanium">Comments</h3>
-            {comments.map((comment) => (
-              <CommentViewer
-                key={comment._id}
-                initialComment={comment}
-                setTotalComments={setTotalComments}
-                totalComments={totalComments}
-                getComments={getComments}
-              />
-            ))}
+            {loadingCommentSection ? (
+              <Spinner size={20} />
+            ) : (
+              <>
+                {comments.length > 0 ? (
+                  comments.map((comment) => (
+                    <CommentViewer
+                      key={comment._id}
+                      initialComment={comment}
+                      setTotalComments={setTotalComments}
+                      totalComments={totalComments}
+                      getComments={getComments}
+                    />
+                  ))
+                ) : (
+                  <p>There is no comments yet, why not be the first?</p>
+                )}
+              </>
+            )}
           </>
         )}
         <div></div>
       </div>
+      {modalDelete && (
+        <ModalAction
+          title="Are you sure you want to delete this post?"
+          setModalOpen={setModalDelete}
+          handleAction={handleDeletePost}
+        />
+      )}
     </div>
   );
 };

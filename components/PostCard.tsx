@@ -30,8 +30,8 @@ const PostCard = ({ post }: { post: PostCardType }) => {
   const [totalLikes, setTotalLikes] = useState<number>(
     post?.likes?.length || 0
   );
-  const [totalViews, setTotalViews] = useState<number>(
-    post?.views?.length || 0
+  const [totalViews, setTotalViews] = useState<string[]>(
+    post?.views?.map((v) => v._ref) ?? []
   );
   const [totalComments, setTotalComments] = useState<number>(
     post?.totalComments || 0
@@ -44,7 +44,7 @@ const PostCard = ({ post }: { post: PostCardType }) => {
 
   return (
     <>
-      <div className="relative flex flex-col bg-black w-full h-[340px]  min-w-[300px] max-w-[450px] py-6 px-5 rounded-lg shadow-lg transition-all duration-500 hover:shadow-sm hover:shadow-black-100 group">
+      <div className="relative flex flex-col bg-black w-full h-[300px]  min-w-[350px] max-w-[400px] py-6 px-5 rounded-lg shadow-lg transition-all duration-500 hover:shadow-sm hover:shadow-black-100 group">
         <div className="absolute inset-0 bg-gradient-to-br from-[#29BBF0]/5 to-[#F09029]/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 rounded-lg pointer-events-none"></div>
         <div className="flex-between">
           <p className="font-oxanium px-2 py-1 text-sm font-extralight rounded bg-black-100">
@@ -61,7 +61,7 @@ const PostCard = ({ post }: { post: PostCardType }) => {
             </div>
             <div className="flex items-center space-x-1">
               <EyeIcon className="size-4 text-primary" />
-              <span className="text-xs font-oxanium">{totalViews}</span>
+              <span className="text-xs font-oxanium">{totalViews.length}</span>
             </div>
           </div>
         </div>
@@ -84,9 +84,9 @@ const PostCard = ({ post }: { post: PostCardType }) => {
         </div>
 
         {parsedContent ? (
-          <div className="bg-[#222829] rounded p-2 mt-2">
+          <div className="bg-[#222829] max-h-[100px] overflow-hidden rounded p-2 mt-2">
             <article
-              className="prose prose-invert break-words line-clamp-3 text-xs"
+              className="prose prose-invert line-clamp-4 break-words max-h-full pb-2 text-xs"
               dangerouslySetInnerHTML={{ __html: parsedContent }}
             />
           </div>

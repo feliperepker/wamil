@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Oxanium } from "next/font/google";
 import "./globals.css";
 import "easymde/dist/easymde.min.css";
+import { Toaster } from "@/components/ui/toaster";
 
 const interSans = Inter({
   variable: "--font-inter-sans",
@@ -29,6 +30,7 @@ export default function RootLayout({
         className={`${interSans.variable} ${oxanium.variable} antialiased bg-black-100 text-white`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );
