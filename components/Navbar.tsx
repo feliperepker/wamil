@@ -1,5 +1,9 @@
-import { auth, signOut, signIn } from "@/auth";
+import { auth, signIn } from "@/auth";
 import Link from "next/link";
+import ProfileNavbar from "./ProfileNavbar";
+import { Github } from "lucide-react";
+import SearchForm from "./SearchForm";
+import SearchUser from "./SearchUser";
 
 const Navbar = async () => {
   const session = await auth();
@@ -13,23 +17,24 @@ const Navbar = async () => {
 
         <div>
           {session && session?.user ? (
-            <form
-              action={async () => {
-                "use server";
-                await signOut({ redirectTo: "/" });
-              }}
-            >
-              <button type="submit">Logout</button>
-            </form>
+            <ProfileNavbar />
           ) : (
-            <form
-              action={async () => {
-                "use server";
-                await signIn("github");
-              }}
-            >
-              <button type="submit">Login</button>
-            </form>
+            <div className="hidden md:flex items-center gap-2">
+              <SearchUser />
+              <form
+                action={async () => {
+                  "use server";
+                  await signIn("github");
+                }}
+              >
+                <button
+                  className="font-oxanium flex items-center gap-2 rounded border-[1px] font-medium transition-all duration-500 text-sm text-gray-300 p-2 hover:bg-[#454545ab]"
+                  type="submit"
+                >
+                  <p>Login with Github</p> <Github size={16} />
+                </button>
+              </form>
+            </div>
           )}
         </div>
       </nav>

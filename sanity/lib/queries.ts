@@ -69,3 +69,11 @@ export const REPLYES_ON_COMMENTS_QUERY =
   _createdAt,
   "userLiked": $userId in coalesce(likes[]._ref, [])
 }`);
+
+export const USER_INFOS_QUERY =
+  defineQuery(`*[_type == "user" && _id == $userId][0] {
+    _id, 
+    name, 
+    image, 
+    username
+}`);
