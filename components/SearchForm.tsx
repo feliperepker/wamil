@@ -38,7 +38,7 @@ const SearchForm = () => {
         onChange={(e) => setQuery(e.target.value)}
         name="query"
         placeholder="Search for posts..."
-        className="bg-black border border-black-100 rounded-md p-2 pr-16 focus:outline-none focus:ring-1 focus:ring-gray-500"
+        className="bg-black border border-black-100 rounded-md p-2 pr-16 focus:outline-none focus:ring-1 focus:ring-gray-500 max-sm:w-40"
       />
       {query && (
         <button

@@ -45,7 +45,7 @@ const PostCard = ({ post }: { post: PostCardType }) => {
 
   return (
     <>
-      <div className="relative flex flex-col bg-black w-full h-[300px]  min-w-[350px] max-w-[400px] py-6 px-5 rounded-lg shadow-lg transition-all duration-500 hover:shadow-sm hover:shadow-black-100 group">
+      <div className="relative flex flex-col bg-black w-full h-[300px] min-w-[300px] max-w-[350px] max-sm:max-w-full max-md:max-w-[450px] py-6 px-5 rounded-lg shadow-lg transition-all duration-500 hover:shadow-sm hover:shadow-black-100 group">
         <div className="absolute inset-0 bg-gradient-to-br from-[#29BBF0]/5 to-[#F09029]/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 rounded-lg pointer-events-none"></div>
         <div className="flex-between">
           <p className="font-oxanium px-2 py-1 text-sm font-extralight rounded bg-black-100">

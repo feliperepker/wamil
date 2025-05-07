@@ -1,6 +1,6 @@
 import { auth, signIn } from "@/auth";
-import ButtonAction from "./ButtonAction";
 import GraphKnowledge from "./GraphKnowledge";
+import Link from "next/link";
 
 const About = async () => {
   const session = await auth();
@@ -26,7 +26,9 @@ const About = async () => {
           }}
         >
           {session && session?.user ? (
-            <ButtonAction text="Start sharing now" variant="btn-secondary" />
+            <Link href="/" className="btn-secondary">
+              Start sharing now
+            </Link>
           ) : (
             <button type="submit" className="btn-secondary">
               Start sharing now
@@ -47,7 +49,7 @@ const About = async () => {
             Here on Wamil, you can share what you're learning with anyone around
             the world—without judgment. We're all here to learn together.
           </p>
-          <div className="flex items-end gap-2">
+          <div className="flex items-end gap-2 mt-4">
             <form
               action={async () => {
                 "use server";
@@ -58,19 +60,23 @@ const About = async () => {
               }}
             >
               {session && session?.user ? (
-                <ButtonAction text="Start sharing" variant="btn-clean" />
+                <Link href="/" className="btn-clean">
+                  Start sharing
+                </Link>
               ) : (
                 <button type="submit" className="btn-clean">
                   Start sharing
                 </button>
               )}
             </form>
-            <a
-              href="#posts-cards"
-              className="text-gray-400 hover:text-gray-600 text-sm cursor-pointer transition-all duration-500 underline"
-            >
-              See what others are posting
-            </a>
+            {!session && (
+              <a
+                href="#posts-cards"
+                className="text-gray-400 hover:text-gray-600 text-sm cursor-pointer transition-all duration-500 underline"
+              >
+                See what others are posting
+              </a>
+            )}
           </div>
         </div>
         <GraphKnowledge />

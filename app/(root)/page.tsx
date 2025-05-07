@@ -25,23 +25,20 @@ export default async function Home({
       {!session ? (
         <About />
       ) : (
-        <section className="w-full p-4 pt-10 flex-col flex items-center justify-center">
-          <h1 className="font-oxanium text-5xl drop-shadow-lg">
-            Welcome to Wam<span className="text-primary">i</span>l
-          </h1>
-          <p className="text-gray-300 mb-2">
+        <section className="w-full font-oxanium p-4 pb-0">
+          <p className="text-gray-400 text-lg ">
             What are <span className="text-primary">you</span> learning today?
           </p>
         </section>
       )}
 
-      <div className="mt-4 ml-4 flex">
+      <div className="ml-4 flex mt-4">
         <SearchForm />
         {session && session?.user && <CreatePost />}
       </div>
       <section
         id="posts-cards"
-        className="flex flex-wrap items-center p-4 gap-4"
+        className="flex flex-wrap items-center p-4 gap-4 max-sm:justify-center mx-auto"
       >
         {allPosts.map((post: PostCardType) => {
           return <PostCard key={post._id} post={post} />;

@@ -21,7 +21,13 @@ const OptionsProfileNavbar = ({ userInfo }: { userInfo: User | undefined }) => {
       <div className="w-full h-[1px] bg-black-100"></div>
       <Link
         className="w-full h-10 flex items-center justify-center hover:bg-black-100 transition-all duration-500"
-        href={`profiles/${userInfo?._id}`}
+        href="/about"
+      >
+        About Us
+      </Link>
+      <Link
+        className="w-full h-10 flex items-center justify-center hover:bg-black-100 transition-all duration-500"
+        href={`/profile/${userInfo?._id}`}
       >
         See profile
       </Link>

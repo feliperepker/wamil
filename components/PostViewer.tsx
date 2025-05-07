@@ -102,14 +102,12 @@ const PostViewer = ({
     setLoadingCommentSection(true);
     var userCall = await getUserIdAction();
 
-    if (typeof userCall === "string") {
-      const commentsCall = await client.fetch(COMMENTS_ON_POSTS_QUERY, {
-        postId: _id,
-        userCall,
-      });
+    const commentsCall = await client.fetch(COMMENTS_ON_POSTS_QUERY, {
+      postId: _id,
+      userCall,
+    });
 
-      setComments(commentsCall ?? []);
-    }
+    setComments(commentsCall ?? []);
     setLoadingCommentSection(false);
   };
 
@@ -144,7 +142,10 @@ const PostViewer = ({
       const userId = await getUserIdAction();
 
       if (typeof userId !== "string") {
-        alert("Not signed in");
+        toast({
+          title: "Oops! 😅",
+          description: "You need to sign in to like this.",
+        });
       } else {
         if (userLiked) {
           result = await removeLikeAction(_id);
@@ -168,6 +169,14 @@ const PostViewer = ({
     textareaRef: RefObject<HTMLTextAreaElement | null>
   ) => {
     try {
+      if (typeof userId !== "string" || userId === "") {
+        toast({
+          title: "Oops! 😅",
+          description: "You need to sign in to comment.",
+        });
+        return;
+      }
+
       setLoadingComment(true);
 
       const comment = textareaRef.current?.value;

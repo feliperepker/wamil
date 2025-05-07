@@ -15,6 +15,7 @@ import {
   removeLikeAction,
 } from "@/lib/actions";
 import { toast } from "@/hooks/use-toast";
+import { user } from "@/sanity/schemaTypes/user";
 
 export type CommentType = Omit<
   Comment,
@@ -102,8 +103,11 @@ const CommentViewer = ({
     try {
       let result;
       if (!comment) return;
-      if (typeof userId !== "string") {
-        alert("Not signed in");
+      if (typeof userId !== "string" || userId === "") {
+        toast({
+          title: "Oops! 😅",
+          description: "You need to sign in to like this.",
+        });
       } else {
         if (userLiked) {
           result = await removeLikeAction(comment._id);
@@ -126,6 +130,14 @@ const CommentViewer = ({
     textareaRef: RefObject<HTMLTextAreaElement | null>
   ) => {
     try {
+      if (typeof userId !== "string" || userId === "") {
+        toast({
+          title: "Oops! 😅",
+          description: "You need to sign in to reply a comment.",
+        });
+        return;
+      }
+
       setLoadingComment(true);
 
       const commentText = textareaRef.current?.value;
@@ -351,8 +363,11 @@ const ParentComments = ({
     try {
       let result;
       if (!comment) return;
-      if (typeof userId !== "string") {
-        alert("Not signed in");
+      if (typeof userId !== "string" || userId === "") {
+        toast({
+          title: "Oops! 😅",
+          description: "You need to sign in to like this.",
+        });
       } else {
         if (userLiked) {
           result = await removeLikeAction(_id);

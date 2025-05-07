@@ -11,6 +11,17 @@ export const USER_BY_GITHUB_ID_QUERY =
   bio
 }`);
 
+export const USER_BY_ID_QUERY =
+  defineQuery(`*[_type == "user" && _id == $id][0] {
+  _id,
+  id, 
+  name, 
+  username, 
+  email, 
+  image,
+  bio
+}`);
+
 export const CATEGORY_BY_ID_QUERY =
   defineQuery(`*[_type == "category" && _id == $id][0] {
   _id
@@ -76,4 +87,30 @@ export const USER_INFOS_QUERY =
     name, 
     image, 
     username
+}`);
+
+export const GET_USERS_QUERY =
+  defineQuery(`*[_type == "user" && (!defined($search) || name match $search || username match $search)] | order(name asc) {
+    _id, 
+    name, 
+    image, 
+    username
+}`);
+
+export const POSTS_BY_USER_QUERY =
+  defineQuery(`*[_type == "post" && author->_id match $id] | order(_createdAt asc) {
+  _id, 
+  title, 
+  slug,
+  category -> {
+    _id, category
+  }, 
+  _createdAt,
+  author -> {
+    _id, name, image, bio, username
+  }, 
+  views,
+  likes,
+  "totalComments": count(*[_type == "comment" && post._ref == ^._id]),
+  post
 }`);
