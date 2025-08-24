@@ -105,7 +105,7 @@ const CreatePost = () => {
           <form
             onSubmit={createPost}
             onClick={(e) => e.stopPropagation()}
-            className="mx-auto p-4 rounded bg-black mt-4 h-full overflow-y-scroll w-[90%] flex flex-col max-sm:w-full"
+            className="mx-auto p-4 rounded bg-black mt-4 h-[80%] overflow-y-scroll w-[90%] max-w-[1200px] flex flex-col max-sm:w-full max-sm:h-full"
           >
             <div className="flex items-center justify-between">
               <h3 className="font-oxanium text-lg font-semibold mb-1">
